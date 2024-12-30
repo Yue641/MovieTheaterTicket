@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>OMTBS</title>
+    <link rel="icon" href="{{ url_for('static', filename='favicon-film.ico') }}">
+    <link href="{{ url_for('static', filename='bootstrap.min.css') }}" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='icons/css/all.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='lib/themes/default.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='lib/themes/default.date.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='lib/themes/default.time.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css') }}">
+    <style>
+        .center-table {
+            margin: 0 auto;
+            width: 80%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .center-table th, .center-table td {
+            padding: 10px;
+            text-align: center;
+            border: 1px solid #ddd;
+        }
+        
+        .center-table th {
+            background-color: #ffffff;
+            color: #000000;
+        }
+        
+        .center-table tr:hover {
+            background-color: inherit;
+        }
+        
+        .btn-delete {
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+
+        .btn-delete:hover {
+            background-color: #c0392b;
+        }
+
+        .movie-list-title {
+            text-align: center;
+            margin-top: 20px;
+            margin-bottom: 20px;
+            color: #ffffff;
+        }
+
+        #showform {
+            display: none;
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        #showform input {
+            margin: 5px;
+            padding: 5px;
+            width: 300px;
+        }
+
+        #showform button {
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="jumbotron login-header">
+            <img src="{{ url_for('static', filename='b.png') }}" width="110px" alt="">
+            <h1>MovieTicketManager</h1>
+            <h4>Movie Ticket Booking System</h4>
+        </div>
+        <h1 class="movie-list-title">List of All Shows</h1>
+        <table class="center-table">
+            <tr>
+                <th>Show ID</th>
+                <th>Movie Name</th>
+                <th>Hall ID</th>
+                <th>Type</th>
+                <th>Date</th>
+                <th>Actions</th>
+            </tr>
+            {% for show in shows %}
+            <tr>
+                <td>{{ show.show_id }}</td>
+                <td>{{ show.movie_name }}</td>
+                <td>{{ show.hall_id }}</td>
+                <td>{{ show.type }}</td>
+                <td>{{ show.date }}</td>
+                <td>
+                    <button class="btn-delete" onclick="deleteShow('{{ show.show_id }}')">Delete</button>
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+        <button onclick="history.back()" class="btn btn-danger d-flex justify-content-center mx-auto">Return</button>
+    </div>
+
+    <script>
+        function deleteShow(showId) {
+            if (confirm('Are you sure you want to delete this show?')) {
+                fetch('/deleteShow', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+                    body: `show_id=${showId}`
+                })
+                .then(response => response.text())
+                .then(data => {
+                    alert(data);
+                    window.location.reload();
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Failed to delete the show.');
+                });
+            }
+        }
+    </script>
+</body>
+</html>

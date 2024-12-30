@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>OMTBS</title>
+    <link rel="icon" href="{{ url_for('static', filename='favicon-film.ico') }}">
+    <link href="{{ url_for('static', filename='bootstrap.min.css') }}" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='icons/css/all.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='lib/themes/default.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='lib/themes/default.date.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='lib/themes/default.time.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css') }}">
+    <style>
+
+        .center-table {
+            margin: 0 auto;
+            width: 80%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .center-table th, .center-table td {
+            padding: 10px;
+            text-align: center;
+            border: 1px solid #ddd;
+        }
+        
+        .center-table th {
+            background-color: #ffffff; /* Nền cố định cho các ô đầu của bảng */
+            color: #000000;
+        }
+        
+        /* Loại bỏ hiệu ứng hover nhưng vẫn giữ lại nền vốn có */
+        .center-table tr:hover {
+            background-color: inherit; /* Không thay đổi màu nền khi di chuột qua */
+        }
+        
+        .btn-delete {
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+        
+        /* Loại bỏ hiệu ứng hover cho nút delete nhưng giữ lại màu nền */
+        .btn-delete:hover {
+            background-color: #e74c3c; /* Giữ lại màu nền ban đầu */
+        }
+        
+        .movie-list-title {
+            text-align: center; /* Căn giữa văn bản */
+            margin-top: 20px; /* Khoảng cách trên */
+            margin-bottom: 20px; /* Khoảng cách dưới */
+            color: #ffffff; /* Màu chữ cho tiêu đề */
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="jumbotron login-header">
+            <img src="../static/b.png" width="110px" alt="">
+            <h1>MovieTicketManager</h1>
+            <h4>Movie Ticket Booking System</h4>
+        </div>
+    <div class="container">
+        <h1 class="movie-list-title">List of All Tickets</h1>
+        <table class="table table-bordered">
+            <thead class="thead-dark">
+                <tr>
+                    <th>Ticket No</th>
+                    <th>Show ID</th>
+                    <th>Time</th>
+                    <th>Movie Name</th>
+                    <th>Seat No</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for ticket in tickets %}
+                <tr>
+                    <td>{{ ticket.ticket_no }}</td>
+                    <td>{{ ticket.show_id }}</td>
+                    <td>{{ ticket.time }}</td>
+                    <td>{{ ticket.movie_name }}</td>
+                    <td>{{ ticket.seat_no }}</td>
+                    <td>
+                        <button class="btn btn-danger btn-sm btn-delete" onclick="deleteTicket('{{ ticket.ticket_no }}')">Delete</button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <button onclick="history.back()" class="btn btn-danger d-flex justify-content-center mx-auto">Return</button>
+    </div>
+
+    <script>
+        function deleteTicket(ticketNo) {
+            if (confirm('Are you sure you want to delete this ticket?')) {
+                fetch('/deleteTicket', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+                    body: `ticket_no=${ticketNo}`
+                })
+                .then(response => response.text())
+                .then(data => {
+                    alert(data);
+                    // Reload the page to reflect the changes
+                    window.location.reload();
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Failed to delete the ticket.');
+                });
+            }
+        }
+    </script>
+</body>
+</html>

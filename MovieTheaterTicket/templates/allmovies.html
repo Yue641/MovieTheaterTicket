@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>OMTBS</title>
+    <link rel="icon" href="{{ url_for('static', filename='favicon-film.ico') }}">
+    <link href="{{ url_for('static', filename='bootstrap.min.css') }}" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='icons/css/all.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='lib/themes/default.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='lib/themes/default.date.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='lib/themes/default.time.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css') }}">
+    <style>
+        .center-table {
+            margin: 0 auto;
+            width: 80%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .center-table th, .center-table td {
+            padding: 10px;
+            text-align: center;
+            border: 1px solid #ddd;
+        }
+        
+        .center-table th {
+            background-color: #ffffff;
+            color: #000000;
+        }
+        
+        .center-table tr:hover {
+            background-color: inherit;
+        }
+        
+        .btn-delete, .btn-edit {
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+
+        .btn-delete:hover, .btn-edit:hover {
+            background-color: #c0392b;
+        }
+
+        .movie-list-title {
+            text-align: center;
+            margin-top: 20px;
+            margin-bottom: 20px;
+            color: #ffffff;
+        }
+
+        #movieform {
+            display: none;
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        #movieform input {
+            margin: 5px;
+            padding: 5px;
+            width: 300px;
+        }
+
+        #movieform button {
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="jumbotron login-header">
+            <img src="{{ url_for('static', filename='b.png') }}" width="110px" alt="">
+            <h1>MovieTicketManager</h1>
+            <h4>Movie Ticket Booking System</h4>
+        </div>
+        <h1 class="movie-list-title">List of All Movies</h1>
+        <table class="center-table">
+            <tr>
+                <th>Movie ID</th>
+                <th>Movie Name</th>
+                <th>Length</th>
+                <th>Language</th>
+                <th>Show Start</th>
+                <th>Show End</th>
+                <th>Actions</th>
+            </tr>
+            {% for movie in movies %}
+            <tr>
+                <td>{{ movie.movie_id }}</td>
+                <td>{{ movie.movie_name }}</td>
+                <td>{{ movie.length }}</td>
+                <td>{{ movie.language }}</td>
+                <td>{{ movie.show_start }}</td>
+                <td>{{ movie.show_end }}</td>
+                <td>
+                    <button class="btn-delete" onclick="deleteMovie('{{ movie.movie_id }}')">Delete</button>
+                    <button class="btn-edit" onclick="showEditForm('{{ movie.movie_id }}', '{{ movie.movie_name }}', '{{ movie.length }}', '{{ movie.language }}', '{{ movie.show_start }}', '{{ movie.show_end }}')">Edit</button>
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+        <button onclick="history.back()" class="btn btn-danger d-flex justify-content-center mx-auto">Return</button>
+
+        <!-- Form chỉnh sửa -->
+        <div id="movieform" style="display:none;">
+            <h4>Edit Movie</h4>
+            <form id="editMovieForm" method="POST" action="/editMovie" onsubmit="submitForm(event)">
+                <input type="hidden" id="movieId" name="movie_id">
+                <input type="text" id="movieName" name="movie_name" placeholder="Name" required>
+                <input type="text" id="movieLen" name="length" placeholder="Length (in min)" required>
+                <input type="text" id="movieLang" name="language" placeholder="Language" required>
+                <input type="date" id="movieStart" name="show_start" required>
+                <input type="date" id="movieEnd" name="show_end" required>
+                <button type="submit" class="btn-submit">Submit</button>
+            </form>
+        </div>        
+    </div>
+
+    <script>
+        function deleteMovie(movieId) {
+            if (confirm('Are you sure you want to delete this movie?')) {
+                fetch('/deleteMovie', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+                    body: `movie_id=${movieId}`
+                })
+                .then(response => response.text())
+                .then(data => {
+                    alert(data);
+                    window.location.reload();
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Failed to delete the movie.');
+                });
+            }
+        }
+
+        function showEditForm(id, name, length, language, start, end) {
+            document.getElementById('movieform').style.display = 'block';
+            document.getElementById('movieId').value = id;
+            document.getElementById('movieName').value = name;
+            document.getElementById('movieLen').value = length;
+            document.getElementById('movieLang').value = language;
+            document.getElementById('movieStart').value = start;
+            document.getElementById('movieEnd').value = end;
+        }
+        // Hàm để xử lý việc gửi form và gọi hàm updateMovie qua AJAX
+        function submitForm(event) {
+            event.preventDefault(); // Ngừng gửi form mặc định
+        
+            // Lấy giá trị từ form
+            var movie_id = document.getElementById('movieId').value;
+            var movie_name = document.getElementById('movieName').value;
+            var length = document.getElementById('movieLen').value;
+            var language = document.getElementById('movieLang').value;
+            var show_start = document.getElementById('movieStart').value;
+            var show_end = document.getElementById('movieEnd').value;
+        
+            var formData = new FormData();
+            formData.append('movie_id', movie_id);
+            formData.append('movie_name', movie_name);
+            formData.append('length', length);
+            formData.append('language', language);
+            formData.append('show_start', show_start);
+            formData.append('show_end', show_end);
+        
+            // Gửi yêu cầu AJAX tới Flask để cập nhật dữ liệu
+            fetch('/editMovie', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.text())
+            .then(data => {
+                if (data.includes("Error")) {
+                    alert("Update failed: " + data);
+                } else {
+                    // Nếu cập nhật thành công, reload trang để lấy dữ liệu mới
+                    location.reload();  // Reload toàn bộ trang
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        }
+        
+
+    </script>
+</body>
+</html>
